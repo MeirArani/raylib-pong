@@ -140,6 +140,7 @@ It's pretty simple actually:
 - [jason-cannon](https://github.com/jason-cannon) Jason Cannon - contributor
 - [return215](https://github.com/return215) Muhammad Hidayat - contributor
 - [Samuel Asher Rivello](https://github.com/SamuelAsherRivello) - contributor
+- [Kirisummer](https://github.com/Kirisummer) - contributor
 
 
 ## Licence
