@@ -77,7 +77,15 @@ $ sudo dnf install alsa-lib-devel mesa-libGL-devel libX11-devel libXrandr-devel 
 For the project build system to function correctly, you will need to have Git installed on your system if it isn't already (it's a good idea to have it anyway - take it from us). You can install it by [downloading it from here](https://git-scm.com/download/win) and going through the setup wizard.
 
 ### Installing MinGW
-Building raylib libraries requires the installation of MinGW ([32](http://www.mingw.org/) and [64](http://mingw-w64.org/doku.php/download) bit versions). Please ensure that you link MinGW's `bin` directory to your system environment variables for BOTH the 32 and 64 bit versions. You can follow the instructions here for the [32-bit](https://www.youtube.com/watch?v=sXW2VLrQ3Bs) and here for the [64-bit](https://code.visualstudio.com/docs/cpp/config-mingw) bit versions.
+Building raylib libraries requires the installation of [MinGW-w64](https://www.mingw-w64.org). This can be done in several ways, but for the purpose of this documentation, we suggest either direct installation and linking on your system, or installing via the MSYS2 package manager. Both methods are outlined below:
+
+#### Installing Direct
+To install directly, you can follow the instructions [here](https://www.youtube.com/watch?v=sXW2VLrQ3Bs) for the 32-bit and [here](https://code.visualstudio.com/docs/cpp/config-mingw) for the 64-bit version. Please ensure that you have linked link MinGW's `bin` directory to your system environment variables for BOTH the 32 and 64 bit versions.
+
+#### Installing via MSYS2
+To install via [MSYS2](https://www.msys2.org/), install the package manager and then install the following packages via its provided UCRT terminal:
+- `mingw-w64-ucrt-x86_64-gcc`
+- `mingw-w64-ucrt-x86_64-make`
 
 After installing MinGW, you should have G++ installed. You can verify this by running:
 ```console
