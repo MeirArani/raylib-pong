@@ -1,5 +1,6 @@
 #include <raylib-cpp.hpp>
 #include <iostream>
+#include <algorithm>
 
 
 const int WellSizeX = 10;
@@ -25,30 +26,66 @@ bool TimeToDrop()
 }
 
 
-struct Tetramino {
-    
+struct Position {
+    int x;
+    int y;
 };
-
 struct Block {
-  bool active = false;
-  Color color = BLACK;  
+  Color color = BLACK;
+};
+struct Tetramino {
+    std::vector<Position> offsets;
+    Color color;
+    Position position;
 };
 
-bool BlockIsEmpty(Block block)
-{
-    return block.color.r == 0 && block.color.g == 0 && block.color.b == 0;
-}
+const Tetramino t = {{{0, 0}, {-1, 0}, {1, 0}, {0, -1}}, GREEN, {1,15}};
+
+
+
 
 class Well {
-    std::vector<Block> wellRow;
-    std::vector<std::vector<Block>> well;
+    std::vector<Color> wellCol;
+    std::vector<std::vector<Color>> well;
     Rectangle wellRect = {padding.x, padding.y, gridSize* WellSizeX, gridSize * WellSizeY};
+    Tetramino activePiece;
+
+    void SetActivePiece(Tetramino newPiece) 
+    {
+        activePiece = newPiece;
+        for(auto it = activePiece.offsets.begin(); it != activePiece.offsets.end(); ++it)
+        {
+            well[activePiece.position.x + it->x][activePiece.position.y + it->y] = activePiece.color;
+        }
+    }
+
+
+    bool BlockIsEmpty(const int x, const int y)
+    {
+        if(x >= well.size() || y >= well[0].size()) return false;
+        return well[x][y].r == 0 && well[x][y].g == 0 && well[x][y].b == 0;
+    }
+
+    bool BlockIsActive(const int x, const int y)
+    {
+        std::cout << "Block check: " << x << " " << y << std::endl;
+        for(auto it = activePiece.offsets.begin(); it != activePiece.offsets.end(); ++it)
+        {
+            if(it->x + activePiece.position.x == x && it->y + activePiece.position.y == y)
+            {
+                std::cout << "block is ACTIVE" << std::endl;
+                return true;
+            }
+        }
+        std::cout << "block is INACTIVE" << std::endl;
+        return false;
+    }
+
 public: 
 
-    Well(int width, int height): wellRow(width, {false, RED}), well(height, wellRow)
+    Well(const int height, const int width): wellCol(height, {BLACK}), well(width, wellCol)
     {
-        well[2][3].active = true;
-        well[2][3].color = RED;
+        SetActivePiece(t);
     }
 
     ~Well()
@@ -58,39 +95,46 @@ public:
 
     void UpdateWell()
     {
-        for(int i = 0; i < well.size()-1; i++)
+        std::vector<Position> moveSpots;
+        // for(int i = 0; i < well.size(); i++)
+        // {
+        //     for(int j = well[i].size()-2; j > 0; j--)
+        //     {
+        //         if(!BlockIsEmpty(i, j) && BlockIsEmpty(i, j+1) && !BlockIsActive(i, j))
+        //         {
+        //             moveSpots.push_back({i, j});
+        //         }
+                
+        //     }
+        // }
+
+        bool canMove = true;
+        for(auto it = activePiece.offsets.begin(); it != activePiece.offsets.end(); ++it)
         {
-            for(int j = 0; j < well[i].size()-1; j++)
+            const int x = it->x + activePiece.position.x;
+            const int y = it->y + activePiece.position.y;
+            std::cout << "Current Pos: " << x << " " << y << std::endl;
+            if(!BlockIsActive(x, y+1) && !BlockIsEmpty(x, y+1))
             {
-                if(well[i][j].active)
-                {
-                    std::cout << "well " << i << " " << j << " is active!" << std::endl; 
-                    well[i][j+1].color = well[i][j].color;
-                    well[i][j+1].active = true;
-                    well[i][j].color = BLACK;
-                    well[i][j].active = false;
-                    return;
-                }
+                std::cout << "BLOCK IS FULL " << x << " " << y+1 << std::endl;
+                canMove = false;
             }
         }
-    }
-    void PrintWell()
-    {
-        for(int i = 0; i< well.size(); i++)
+        if(canMove)
         {
-            for(int j = 0; j<well[i].size(); j++)
+            std::cout << "PIECE CAN MOVE!" << std::endl;
+            for(auto it = activePiece.offsets.rbegin(); it != activePiece.offsets.rend(); ++it)
             {
-                if(BlockIsEmpty(well[i][j]))
-                {
-                    std::cout << 0 << " ";
-                }
-                else 
-                {
-                    std::cout << 1 << " ";
-                }
+                moveSpots.push_back({it->x + activePiece.position.x, it->y + activePiece.position.y});
             }
-            std::cout << std::endl;
+            activePiece.position = {activePiece.position.x, activePiece.position.y+1};
         }
+
+        std::for_each(moveSpots.rbegin(), moveSpots.rend(), [this](const Position p){
+            std::cout << p.x << " " << p.y << std::endl;
+            well[p.x][p.y+1] = well[p.x][p.y];
+            well[p.x][p.y] = well[p.x][p.y-1];
+        });
     }
 
     void DrawWell()
@@ -100,9 +144,9 @@ public:
         {
             for(int j = 0; j < well[i].size(); j++)
             {
-                if(well[i][j].active)
+                if(!BlockIsEmpty(i, j))
                 {
-                    DrawGridSpot(i, j, well[i][j].color);
+                    DrawGridSpot(i, j, well[i][j]);
                 }
             }
         }
@@ -150,7 +194,7 @@ int main()
     std::cout << "Starting the game..." << std::endl;
     InitWindow(resolution.x, resolution.y, "myyrtris");
     SetTargetFPS(60);
-    Well well(WellSizeX, WellSizeY);
+    Well well(WellSizeY, WellSizeX);
     while(WindowShouldClose() == false)
     {
         //Logic
