@@ -33,13 +33,48 @@ struct Position {
 struct Block {
   Color color = BLACK;
 };
+
+struct TetrominoShape {
+
+    std::vector<Position> offsets;
+    Color color;
+};
+
+const TetrominoShape TBlock = {{{0, 0}, {-1, 0}, {1, 0}, {0, -1}}, PINK};
+const TetrominoShape SquareBlock = {{{0,0}, {1,0}, {1,-1}, {0,-1}}, YELLOW};
+
+class Tetromino {
+    TetrominoShape shape;
+    std::vector<Position> currentOffsets;
+    Position position;
+public:
+    Tetromino(TetrominoShape shape, Position position): shape(shape), position(position)
+    {
+        currentOffsets = shape.offsets;
+    }
+
+    void RotateCW()
+    {
+        // if(shape == SquareBlock) return;
+        // for(Position& pos : currentOffsets)
+        // {
+        //     // pos.y = pos.y > 0 ? pos.y - pos.y : pos.y + pos.y;
+        // }
+    }
+
+    ~Tetromino()
+    {
+        
+    }
+};
+
 struct Tetramino {
     std::vector<Position> offsets;
     Color color;
     Position position;
 };
 
-const Tetramino t = {{{0, 0}, {-1, 0}, {1, 0}, {0, -1}}, GREEN, {1,15}};
+const Tetramino t = {{{0, 0}, {-1, 0}, {1, 0}, {0, -1}}, GREEN, {1,8}};
 
 
 
@@ -58,7 +93,6 @@ class Well {
             well[activePiece.position.x + it->x][activePiece.position.y + it->y] = activePiece.color;
         }
     }
-
 
     bool BlockIsEmpty(const int x, const int y)
     {
@@ -188,6 +222,21 @@ void PrintMatrix(Matrix mat)
     std::cout << mat.m3 << mat.m7 << mat.m11 << mat.m15 << std::endl;
 }
 
+// Rotate by 90 deg: 
+// Transpose, then reverse rows
+Matrix RotateCW(Matrix mat)
+{
+    Matrix t = MatrixTranspose(mat);
+    return Matrix{t.m12, t.m8, t.m4, t.m0, t.m13, t.m9, t.m5, t.m1, t.m14, t.m10, t.m6, t.m2, t.m15, t.m11, t.m7, t.m3};
+}
+
+// Rotate by -90 deg:
+// Transpose, then reverse columns
+Matrix RotateCCW(Matrix mat)
+{
+    Matrix t = MatrixTranspose(mat);
+    return Matrix{t.m3, t.m7, t.m11, t.m15, t.m2, t.m6, t.m10, t.m14, t.m1, t.m5, t.m9, t.m13, t.m0, t.m4, t.m8, t.m12};
+}
 
 int main()
 {
@@ -195,9 +244,19 @@ int main()
     InitWindow(resolution.x, resolution.y, "myyrtris");
     SetTargetFPS(60);
     Well well(WellSizeY, WellSizeX);
+    const Matrix t = {
+        0, 0, 0, 0, 
+        0, 1, 1, 1, 
+        0, 0, 1, 0, 
+        0, 0, 0, 0
+    };
     while(WindowShouldClose() == false)
     {
-        //Logic
+        // EVENTS
+
+        // UPDATES 
+
+        // DRAW
         BeginDrawing();
 
         ClearBackground(BLACK);
@@ -208,6 +267,11 @@ int main()
         {
             well.UpdateWell();
             std::cout << "UPDATE" << std::endl;
+            PrintMatrix(t);
+            std::cout << std::endl;
+            PrintMatrix(RotateCW(t));
+            std::cout << std::endl;
+            PrintMatrix(RotateCCW(t));
         }
     
         EndDrawing();
