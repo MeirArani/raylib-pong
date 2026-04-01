@@ -1,6 +1,7 @@
 #include <raylib-cpp.hpp>
 #include <iostream>
 #include <algorithm>
+#include <stdexcept>
 
 
 const int WellSizeX = 10;
@@ -25,7 +26,6 @@ bool TimeToDrop()
     return false;
 }
 
-
 struct Position {
     int x;
     int y;
@@ -42,7 +42,6 @@ struct TetrominoShape {
 
 const TetrominoShape TBlock = {{{0, 0}, {-1, 0}, {1, 0}, {0, -1}}, PINK};
 const TetrominoShape SquareBlock = {{{0,0}, {1,0}, {1,-1}, {0,-1}}, YELLOW};
-
 class Tetromino {
     TetrominoShape shape;
     std::vector<Position> currentOffsets;
@@ -77,6 +76,72 @@ struct Tetramino {
 const Tetramino t = {{{0, 0}, {-1, 0}, {1, 0}, {0, -1}}, GREEN, {1,8}};
 
 
+
+class RotationList {
+    struct Rotation {
+        std::vector<Position> offsets;
+        struct Rotation *prev, *next;
+        Rotation(std::vector<Position> data)
+        {
+            this->offsets = data;
+            this->next = this->prev = nullptr;
+        }
+    };   
+
+    Rotation* currentRotation;
+public: 
+    Rotation *head;
+    RotationList(std::vector<std::vector<Position>> rotations) {
+        head = nullptr;
+        std::for_each(rotations.begin(), rotations.end(), 
+            [this](std::vector<Position> &offsets){
+                Rotation *newRotation = new Rotation(offsets);
+                if(head == nullptr)
+                {
+                    head = newRotation;
+                    newRotation->next = head;
+                    newRotation->prev = head;
+                    return;
+                }
+                Rotation *tail = head->prev;
+                newRotation->next = head;
+                newRotation->prev = tail;
+                tail->next = newRotation;
+                head->prev = newRotation;
+            });
+    currentRotation = head;
+    }
+
+    std::vector<Position> RotateCW()
+    {
+        currentRotation = currentRotation->next;
+        return currentRotation->offsets;
+    }
+
+    std::vector<Position> RotateCCW()
+    {
+        currentRotation = currentRotation->prev;
+        return currentRotation->offsets;
+    }
+
+    std::vector<Position> GetCurrentRotation() const
+    {
+        return currentRotation->offsets;
+    }
+
+    void Test(){}
+
+    // std::vector<Position> GetNextCW()
+    // {
+    //     return currentRotation->prev->offsets;
+    // }
+
+    // std::vector<Position> GetNextCCW()
+    // {
+    //     return currentRotation->next->offsets;
+    // }
+
+};
 
 
 class Well {
@@ -250,6 +315,30 @@ int main()
         0, 0, 1, 0, 
         0, 0, 0, 0
     };
+
+    RotationList rotList(
+    {
+        {
+            {0, 0}, {-1, 0}, {1, 0}, {0, 1}
+        },
+        {
+            {0, 0}, {0, -1}, {0, 1}, {1, 0}
+        },
+        {
+            {0, 0}, {-1, 0}, {1, 0}, {0, -1}
+        },
+        {
+            {0, 0}, {0, -1}, {0, 1}, {-1, 0}
+        }
+    });
+
+    const std::vector<Position> test = rotList.RotateCW();
+    for(auto i: test)
+    {
+        std::cout << i.x << i.y << " ";
+    }
+    std::cout << std::endl;
+
     while(WindowShouldClose() == false)
     {
         // EVENTS
