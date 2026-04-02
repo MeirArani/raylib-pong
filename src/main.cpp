@@ -15,6 +15,212 @@ int offset = 75;
 const double timeToDrop = 1;
 double timeSinceLastDrop = 0;
 
+struct Position {
+    int x;
+    int y;
+
+    Position operator+(const Position &pos)
+    {
+        return {pos.x + x, pos.y + y};
+    }
+
+    Position operator-(const Position &pos)
+    {
+        return {x - pos.x, y - pos.y};
+    }
+};
+
+
+std::ostream& operator<<(std::ostream& os, const Position &pos)
+{
+    os << "(" << pos.x << ", " << pos.y << ")" << std::endl;
+    return os;
+}
+
+struct Block {
+  Color color = BLACK;
+};
+
+std::ostream& operator<<(std::ostream& os, const std::vector<int>& vec)
+{
+    for(int i = 0; i<vec.size(); i++)
+    {
+        os << vec[i] << " ";
+        if((i+1) % 5 == 0)
+        {
+            os << std::endl;
+        }
+    }
+    return os;
+}
+
+
+
+
+class Tetromino {
+
+    void Transpose()
+    {
+        std::vector<int> newArr(25, 0);
+        newArr[0] = piece[0];
+        newArr[1] = piece[5];
+        newArr[2] = piece[10];
+        newArr[3] = piece[15];
+        newArr[4] = piece[20];
+        newArr[5] = piece[1];
+        newArr[6] = piece[6];
+        newArr[7] = piece[11];
+        newArr[8] = piece[16];
+        newArr[9] = piece[21];
+        newArr[10] = piece[2];
+        newArr[11] = piece[7];
+        newArr[12] = piece[12];
+        newArr[13] = piece[17];
+        newArr[14] = piece[22];
+        newArr[15] = piece[3];
+        newArr[16] = piece[8];
+        newArr[17] = piece[13];
+        newArr[18] = piece[18];
+        newArr[19] = piece[23];
+        newArr[20] = piece[4];
+        newArr[21] = piece[9];
+        newArr[22] = piece[14];
+        newArr[23] = piece[20];
+        newArr[24] = piece[24];
+        piece = newArr;
+        
+        //std::cout<< "TRANSPOSE" << std::endl << piece << std::endl;
+    }
+
+    void ReverseRows()
+    {
+        std::vector<int> newArr(25, 0);
+        newArr[0] = piece[4];
+        newArr[1] = piece[3];
+        newArr[2] = piece[2];
+        newArr[3] = piece[1];
+        newArr[4] = piece[0];
+    
+        newArr[5] = piece[9];
+        newArr[6] = piece[8];
+        newArr[7] = piece[7];
+        newArr[8] = piece[6];
+        newArr[9] = piece[5];
+        
+        newArr[10] = piece[14];
+        newArr[11] = piece[13];
+        newArr[12] = piece[12];
+        newArr[13] = piece[11];
+        newArr[14] = piece[10];
+        
+        newArr[15] = piece[19];
+        newArr[16] = piece[18];
+        newArr[17] = piece[17];
+        newArr[18] = piece[16];
+        newArr[19] = piece[15];
+        
+        newArr[20] = piece[24];
+        newArr[21] = piece[23];
+        newArr[22] = piece[22];
+        newArr[23] = piece[21];
+        newArr[24] = piece[20];
+        piece = newArr;
+       // std::cout<< "COL REVERSE: " << std::endl << piece << std::endl;
+
+    }
+
+    void ReverseCols()
+    {
+        std::vector<int> newArr(25, 0);
+        newArr[0] = piece[20];
+        newArr[1] = piece[15];
+        newArr[2] = piece[10];
+        newArr[3] = piece[5];
+        newArr[4] = piece[0];
+    
+        newArr[5] = piece[21];
+        newArr[6] = piece[16];
+        newArr[7] = piece[11];
+        newArr[8] = piece[6];
+        newArr[9] = piece[1];
+        
+        newArr[10] = piece[22];
+        newArr[11] = piece[17];
+        newArr[12] = piece[12];
+        newArr[13] = piece[7];
+        newArr[14] = piece[2];
+        
+        newArr[15] = piece[23];
+        newArr[16] = piece[18];
+        newArr[17] = piece[13];
+        newArr[18] = piece[8];
+        newArr[19] = piece[3];
+        
+        newArr[20] = piece[24];
+        newArr[21] = piece[19];
+        newArr[22] = piece[14];
+        newArr[23] = piece[9];
+        newArr[24] = piece[4];
+        piece = newArr; 
+        
+        //std::cout << "ROW REVERSE: " << std::endl << piece << std::endl;
+    }
+
+public: 
+    Color color;
+    std::vector<int> piece;   
+    Tetromino(): color(BLACK), piece(25, 0) {}
+    Tetromino(std::vector<Position> offsets, Color color): color(color), piece(25, 0)
+    {
+        piece[12] = 1;
+        for(const Position& offset : offsets)
+        {
+            piece[(offset.x + 2) + (offset.y + 2) * 5] = 1;
+        }
+    }
+
+    void RotateCW()
+    {
+        Transpose();
+        ReverseRows();
+        std::cout << "ROTATE CW:" << std::endl << piece << std::endl;
+    }
+
+    void RotateCCW()
+    {
+        ReverseRows();
+        Transpose();
+        std::cout << "ROTATE CCW:" << std::endl << piece << std::endl;
+    }
+
+    std::vector<Position> GetActiveOffsets() 
+    {
+        std::vector<Position> offsets;
+        for(int i = 0; i<piece.size(); i++)
+        {
+            if(i == 12) continue; // Always occupied (pivot)
+            if(piece[i] != 0)
+            {
+                offsets.push_back({(i % 5) -2 , (i/5) - 2});
+            }
+        }
+        return offsets;
+    }
+
+    std::vector<Position> GetExtremes()
+    {
+        
+    }
+};
+
+Tetromino TBlock({{-1, 0}, {1, 0}, {0, -1}}, GREEN);
+
+std::ostream& operator<<(std::ostream& os, const Tetromino& tet)
+{
+    os << tet.piece << std::endl;
+    return os;
+}
+
 bool TimeToDrop()
 {
     timeSinceLastDrop += GetFrameTime();
@@ -25,138 +231,17 @@ bool TimeToDrop()
     }
     return false;
 }
-
-struct Position {
-    int x;
-    int y;
-};
-struct Block {
-  Color color = BLACK;
-};
-
-struct TetrominoShape {
-
-    std::vector<Position> offsets;
-    Color color;
-};
-
-const TetrominoShape TBlock = {{{0, 0}, {-1, 0}, {1, 0}, {0, -1}}, PINK};
-const TetrominoShape SquareBlock = {{{0,0}, {1,0}, {1,-1}, {0,-1}}, YELLOW};
-class Tetromino {
-    TetrominoShape shape;
-    std::vector<Position> currentOffsets;
-    Position position;
-public:
-    Tetromino(TetrominoShape shape, Position position): shape(shape), position(position)
-    {
-        currentOffsets = shape.offsets;
-    }
-
-    void RotateCW()
-    {
-        // if(shape == SquareBlock) return;
-        // for(Position& pos : currentOffsets)
-        // {
-        //     // pos.y = pos.y > 0 ? pos.y - pos.y : pos.y + pos.y;
-        // }
-    }
-
-    ~Tetromino()
-    {
-        
-    }
-};
-
-struct Tetramino {
-    std::vector<Position> offsets;
-    Color color;
-    Position position;
-};
-
-const Tetramino t = {{{0, 0}, {-1, 0}, {1, 0}, {0, -1}}, GREEN, {1,8}};
-
-
-
-class RotationList {
-    struct Rotation {
-        std::vector<Position> offsets;
-        struct Rotation *prev, *next;
-        Rotation(std::vector<Position> data)
-        {
-            this->offsets = data;
-            this->next = this->prev = nullptr;
-        }
-    };   
-
-    Rotation* currentRotation;
-public: 
-    Rotation *head;
-    RotationList(std::vector<std::vector<Position>> rotations) {
-        head = nullptr;
-        std::for_each(rotations.begin(), rotations.end(), 
-            [this](std::vector<Position> &offsets){
-                Rotation *newRotation = new Rotation(offsets);
-                if(head == nullptr)
-                {
-                    head = newRotation;
-                    newRotation->next = head;
-                    newRotation->prev = head;
-                    return;
-                }
-                Rotation *tail = head->prev;
-                newRotation->next = head;
-                newRotation->prev = tail;
-                tail->next = newRotation;
-                head->prev = newRotation;
-            });
-    currentRotation = head;
-    }
-
-    std::vector<Position> RotateCW()
-    {
-        currentRotation = currentRotation->next;
-        return currentRotation->offsets;
-    }
-
-    std::vector<Position> RotateCCW()
-    {
-        currentRotation = currentRotation->prev;
-        return currentRotation->offsets;
-    }
-
-    std::vector<Position> GetCurrentRotation() const
-    {
-        return currentRotation->offsets;
-    }
-
-    void Test(){}
-
-    // std::vector<Position> GetNextCW()
-    // {
-    //     return currentRotation->prev->offsets;
-    // }
-
-    // std::vector<Position> GetNextCCW()
-    // {
-    //     return currentRotation->next->offsets;
-    // }
-
-};
-
-
 class Well {
     std::vector<Color> wellCol;
     std::vector<std::vector<Color>> well;
     Rectangle wellRect = {padding.x, padding.y, gridSize* WellSizeX, gridSize * WellSizeY};
-    Tetramino activePiece;
+    Tetromino activePiece;
+    Position activePiecePosition;
 
-    void SetActivePiece(Tetramino newPiece) 
+    void SetActivePiece(Tetromino newPiece)
     {
         activePiece = newPiece;
-        for(auto it = activePiece.offsets.begin(); it != activePiece.offsets.end(); ++it)
-        {
-            well[activePiece.position.x + it->x][activePiece.position.y + it->y] = activePiece.color;
-        }
+        activePiecePosition = {2,2};
     }
 
     bool BlockIsEmpty(const int x, const int y)
@@ -167,24 +252,14 @@ class Well {
 
     bool BlockIsActive(const int x, const int y)
     {
-        std::cout << "Block check: " << x << " " << y << std::endl;
-        for(auto it = activePiece.offsets.begin(); it != activePiece.offsets.end(); ++it)
-        {
-            if(it->x + activePiece.position.x == x && it->y + activePiece.position.y == y)
-            {
-                std::cout << "block is ACTIVE" << std::endl;
-                return true;
-            }
-        }
-        std::cout << "block is INACTIVE" << std::endl;
-        return false;
+
     }
 
 public: 
 
     Well(const int height, const int width): wellCol(height, {BLACK}), well(width, wellCol)
     {
-        SetActivePiece(t);
+        SetActivePiece(TBlock);
     }
 
     ~Well()
@@ -194,51 +269,43 @@ public:
 
     void UpdateWell()
     {
-        std::vector<Position> moveSpots;
-        // for(int i = 0; i < well.size(); i++)
-        // {
-        //     for(int j = well[i].size()-2; j > 0; j--)
-        //     {
-        //         if(!BlockIsEmpty(i, j) && BlockIsEmpty(i, j+1) && !BlockIsActive(i, j))
-        //         {
-        //             moveSpots.push_back({i, j});
-        //         }
-                
-        //     }
-        // }
-
-        bool canMove = true;
-        for(auto it = activePiece.offsets.begin(); it != activePiece.offsets.end(); ++it)
+        if(IsKeyDown(KEY_F))
         {
-            const int x = it->x + activePiece.position.x;
-            const int y = it->y + activePiece.position.y;
-            std::cout << "Current Pos: " << x << " " << y << std::endl;
-            if(!BlockIsActive(x, y+1) && !BlockIsEmpty(x, y+1))
+            activePiece.RotateCW();
+        }
+        else if(IsKeyDown(KEY_D))
+        {
+            activePiece.RotateCCW();
+        }
+        else if(IsKeyDown(KEY_LEFT))
+        {
+            if(activePiecePosition.x > 0)
             {
-                std::cout << "BLOCK IS FULL " << x << " " << y+1 << std::endl;
-                canMove = false;
+                activePiecePosition = {activePiecePosition.x-1, activePiecePosition.y};
             }
         }
-        if(canMove)
+        else if(IsKeyDown(KEY_RIGHT))
         {
-            std::cout << "PIECE CAN MOVE!" << std::endl;
-            for(auto it = activePiece.offsets.rbegin(); it != activePiece.offsets.rend(); ++it)
+            if(activePiecePosition.x < well.size())
             {
-                moveSpots.push_back({it->x + activePiece.position.x, it->y + activePiece.position.y});
+                activePiecePosition = {activePiecePosition.x + 1, activePiecePosition.y};
             }
-            activePiece.position = {activePiece.position.x, activePiece.position.y+1};
         }
+        if(CanMove())
+        {
+                    activePiecePosition = {activePiecePosition.x, activePiecePosition.y + 1};
+        }
+    }
 
-        std::for_each(moveSpots.rbegin(), moveSpots.rend(), [this](const Position p){
-            std::cout << p.x << " " << p.y << std::endl;
-            well[p.x][p.y+1] = well[p.x][p.y];
-            well[p.x][p.y] = well[p.x][p.y-1];
-        });
+    bool CanMove()
+    {
+        return true;
     }
 
     void DrawWell()
     {
         DrawRectangleLinesEx(wellRect, 3, WHITE);
+        // Draw dead blocks
         for(int i = 0; i < well.size(); i++)
         {
             for(int j = 0; j < well[i].size(); j++)
@@ -248,6 +315,12 @@ public:
                     DrawGridSpot(i, j, well[i][j]);
                 }
             }
+        }
+
+        DrawGridSpot(activePiecePosition.x, activePiecePosition.y, activePiece.color);
+        for(Position &pos : activePiece.GetActiveOffsets()) 
+        {
+            DrawGridSpot(pos.x + activePiecePosition.x, pos.y + activePiecePosition.y, activePiece.color);
         }
     }
 
@@ -279,29 +352,6 @@ public:
 };
 
 
-void PrintMatrix(Matrix mat)
-{
-    std::cout << mat.m0 << mat.m4 << mat.m8 << mat.m12 << std::endl;
-    std::cout << mat.m1 << mat.m5 << mat.m9 << mat.m13 << std::endl;
-    std::cout << mat.m2 << mat.m6 << mat.m10 << mat.m14 << std::endl;
-    std::cout << mat.m3 << mat.m7 << mat.m11 << mat.m15 << std::endl;
-}
-
-// Rotate by 90 deg: 
-// Transpose, then reverse rows
-Matrix RotateCW(Matrix mat)
-{
-    Matrix t = MatrixTranspose(mat);
-    return Matrix{t.m12, t.m8, t.m4, t.m0, t.m13, t.m9, t.m5, t.m1, t.m14, t.m10, t.m6, t.m2, t.m15, t.m11, t.m7, t.m3};
-}
-
-// Rotate by -90 deg:
-// Transpose, then reverse columns
-Matrix RotateCCW(Matrix mat)
-{
-    Matrix t = MatrixTranspose(mat);
-    return Matrix{t.m3, t.m7, t.m11, t.m15, t.m2, t.m6, t.m10, t.m14, t.m1, t.m5, t.m9, t.m13, t.m0, t.m4, t.m8, t.m12};
-}
 
 int main()
 {
@@ -309,35 +359,6 @@ int main()
     InitWindow(resolution.x, resolution.y, "myyrtris");
     SetTargetFPS(60);
     Well well(WellSizeY, WellSizeX);
-    const Matrix t = {
-        0, 0, 0, 0, 
-        0, 1, 1, 1, 
-        0, 0, 1, 0, 
-        0, 0, 0, 0
-    };
-
-    RotationList rotList(
-    {
-        {
-            {0, 0}, {-1, 0}, {1, 0}, {0, 1}
-        },
-        {
-            {0, 0}, {0, -1}, {0, 1}, {1, 0}
-        },
-        {
-            {0, 0}, {-1, 0}, {1, 0}, {0, -1}
-        },
-        {
-            {0, 0}, {0, -1}, {0, 1}, {-1, 0}
-        }
-    });
-
-    const std::vector<Position> test = rotList.RotateCW();
-    for(auto i: test)
-    {
-        std::cout << i.x << i.y << " ";
-    }
-    std::cout << std::endl;
 
     while(WindowShouldClose() == false)
     {
@@ -356,11 +377,6 @@ int main()
         {
             well.UpdateWell();
             std::cout << "UPDATE" << std::endl;
-            PrintMatrix(t);
-            std::cout << std::endl;
-            PrintMatrix(RotateCW(t));
-            std::cout << std::endl;
-            PrintMatrix(RotateCCW(t));
         }
     
         EndDrawing();
