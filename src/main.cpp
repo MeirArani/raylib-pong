@@ -360,6 +360,27 @@ int main()
     SetTargetFPS(60);
     Well well(WellSizeY, WellSizeX);
 
+    std::vector<std::vector<Vector2>> stdOffsets = {
+      {{  0,  0  },   {  0,  0  }, {  0,  0  }, {  0,  0  }, {  0,  0  }},
+      {{  0,  0  },   {  1,  0  }, {  1, -1  }, {  0,  2  }, {  1,  2  }},
+      {{  0,  0  },   {  0,  0  }, {  0,  0  }, {  0,  0  }, {  0,  0  }},
+      {{  0,  0  },   { -1,  0  }, { -1, -1  }, {  0,  2  }, { -1,  2  }}
+    };
+
+    std::vector<std::vector<Vector2>> IBlockOffsets = {
+      {{  0,  0  }, { -1,  0  }, {  2,  0  }, { -1,  0  }, {  2,  0  }},
+      {{ -1,  0  }, {  0,  0  }, {  0,  0  }, {  0,  1  }, {  0, -2  }},
+      {{ -1,  1  }, {  1,  1  }, { -2,  1  }, {  1,  0  }, { -2,  0  }},
+      {{  0,  1  }, { -1,  1  }, {  0,  1  }, {  0, -1  }, {  0,  2  }}
+    };
+
+    std::vector<std::vector<Vector2>> SBlockOffsets = {
+      {{  0,  0  }},
+      {{  0, -1  }},
+      {{ -1, -1  }},
+      {{ -1,  0  }}
+    };
+
     while(WindowShouldClose() == false)
     {
         // EVENTS
